@@ -1,0 +1,24 @@
+version: "3.8"
+services:
+  vault-origin:
+    image: vault:1.5.4
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: myroot
+    cap_add:
+      - IPC_LOCK
+    ports:
+      - 8201:8200
+  vault-dest:
+    image: vault:1.5.4
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: myroot
+      VAULT_LOCAL_CONFIG: '{"backend": {"file": {"path": "/vault_data/file"}}}'
+    cap_add:
+      - IPC_LOCK
+    ports:
+      - 8202:8200
+  vault-cp:
+    build: ./vault-cp/
+    volumes:
+      - ./vault-cp/:/src/
+    command: sleep 3600
