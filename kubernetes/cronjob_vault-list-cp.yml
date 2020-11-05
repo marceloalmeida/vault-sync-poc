@@ -1,0 +1,63 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    name: vault2vault-sync
+  name: vault2vault-sync
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: vault2vault-sync
+  namespace: vault2vault-sync
+spec:
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 1500
+      backoffLimit: 1
+      template:
+        metadata:
+          annotations:
+          labels:
+            app.kubernetes.io/name: vault2vault-sync
+        spec:
+          containers:
+          - command:
+              - /src/vault-list-cp.py
+            args:
+              - --source-vault-url=$(SOURCE_VAULT_URL)
+              - --source-vault-token=$(SOURCE_VAULT_TOKEN)
+              - --source-vault-mount=$(SOURCE_VAULT_MOUNT)
+              - --target-vault-url=$(TARGET_VAULT_URL)
+              - --target-vault-token=$(TARGET_VAULT_TOKEN)
+              - --target-vault-mount=$(TARGET_VAULT_MOUNT)
+            env:
+              - name: SOURCE_VAULT_URL
+                value: http://vault.origin:8200
+              - name: SOURCE_VAULT_TOKEN
+                value: t0k4N
+              - name: SOURCE_VAULT_MOUNT
+                value: "secret/"
+              - name: TARGET_VAULT_URL
+                value: http://vault.target:8200
+              - name: TARGET_VAULT_TOKEN
+                value: t0k4N
+              - name: TARGET_VAULT_MOUNT
+                value: "secret/"
+            image: marceloalmeida/vault-sync-poc:latest
+            imagePullPolicy: IfNotPresent
+            name: vault2vault-sync
+            resources:
+              limits:
+                cpu: 250m
+                memory: 256Mi
+              requests:
+                cpu: 250m
+                memory: 256Mi
+          restartPolicy: Never
+  schedule: 0 8 31 2 *
+  successfulJobsHistoryLimit: 1
+  suspend: true
