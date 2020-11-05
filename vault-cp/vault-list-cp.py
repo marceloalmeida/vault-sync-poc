@@ -1,10 +1,29 @@
 #!/usr/bin/env python3
 
-import config as cfg
+from argparse import ArgumentParser
 import hvac
 from progress.bar import ShadyBar
 from progress.spinner import PixelSpinner, Spinner
 import re
+
+def parse_args():
+    '''Initialization of global variables'''
+    parser = ArgumentParser(description="Vault to Vault Sync")
+    parser.add_argument('--source-vault-url', metavar='URL', type=str, required=True,
+                        help='Vault URL to copy secrets from')
+    parser.add_argument('--source-vault-token', metavar='Token', type=str, required=True,
+                        help='Vault token to copy secrets from')
+    parser.add_argument('--source-vault-mount', metavar='Mount', type=str, default='secret/',
+                        help='Vault mount to copy secrets from')
+    parser.add_argument('--target-vault-url', metavar='URL', type=str, required=True,
+                        help='Vault URL to copy secrets from')
+    parser.add_argument('--target-vault-token', metavar='Token', type=str, required=True,
+                        help='Vault token to copy secrets from')
+    parser.add_argument('--target-vault-mount', metavar='Mount', type=str, default='secret/',
+                        help='Vault mount to copy secrets from')
+    args = parser.parse_args()
+
+    return args
 
 global_suffix='%(index)d/%(max)d - %(percent).1f%% - %(avg).4f - %(elapsed)ds - %(eta)ds'
 
@@ -25,16 +44,20 @@ def list_secrets(client, path, result_list=[], spinner=Spinner("Loading secrets 
 
     return result_list
 
-client_old = hvac.Client(url=cfg.old["url"], token=cfg.old["token"])
-client_new = hvac.Client(url=cfg.new["url"], token=cfg.new["token"])
+if __name__ == '__main__':
 
-old_kv_secrets = list_secrets(client_old, cfg.old["mount"])
+    cfg = parse_args()
 
-bar = ShadyBar('Copying', max=len(old_kv_secrets), suffix=global_suffix)
-for old_secret in old_kv_secrets:
-    data = client_old.read(old_secret)["data"]
-    client_new.write(lreplace(cfg.old["mount"], cfg.new["mount"], old_secret), **data)
-    bar.suffix = global_suffix + ' - ' + old_secret
-    bar.next()
+    client_old = hvac.Client(url=cfg.source_vault_url, token=cfg.source_vault_token)
+    client_new = hvac.Client(url=cfg.target_vault_url, token=cfg.target_vault_token)
 
-bar.finish()
+    old_kv_secrets = list_secrets(client_old, cfg.source_vault_mount)
+
+    bar = ShadyBar('Copying', max=len(old_kv_secrets), suffix=global_suffix)
+    for old_secret in old_kv_secrets:
+        data = client_old.read(old_secret)["data"]
+        client_new.write(lreplace(cfg.source_vault_mount, cfg.target_vault_mount, old_secret), **data)
+        bar.suffix = global_suffix + ' - ' + old_secret
+        bar.next()
+
+    bar.finish()
