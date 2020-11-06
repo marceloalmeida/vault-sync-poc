@@ -33,11 +33,11 @@ def lreplace(pattern, sub, string):
     """
     return re.sub('^%s' % pattern, sub, string)
 
-def copy_secrets(client_old, client_new, source_mount, target_mount, result_list=[], bar=ShadyBar("Copying secrets ")):
+def copy_secrets(client_old, client_new, source_mount, target_mount, path, result_list=[], bar=ShadyBar("Copying secrets ")):
     list_secrets_result = client_old.list(path=source_mount)
     for secret in list_secrets_result["data"]["keys"]:
         if secret.endswith("/"):
-            copy_secrets(client_old=client_old, client_new=client_new, source_mount=source_mount+secret, target_mount=target_mount, result_list=result_list, bar=bar)
+            copy_secrets(client_old=client_old, client_new=client_new, source_mount=source_mount+secret, target_mount=target_mount, path=path, result_list=result_list, bar=bar)
         else:
             data = client_old.read(source_mount+secret)["data"]
             client_new.write(lreplace(source_mount, target_mount, source_mount+secret), **data)
@@ -53,5 +53,5 @@ if __name__ == '__main__':
     client_new = hvac.Client(url=cfg.target_vault_url, token=cfg.target_vault_token, verify=False)
 
     bar=ShadyBar("Copying secrets ", max=1)
-    copy_secrets(client_old=client_old, client_new=client_new, source_mount=cfg.source_vault_mount, target_mount=cfg.target_vault_mount, bar=bar)
+    copy_secrets(client_old=client_old, client_new=client_new, source_mount=cfg.source_vault_mount, target_mount=cfg.target_vault_mount, path=cfg.source_vault_mount, bar=bar)
     bar.finish()
