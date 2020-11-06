@@ -49,8 +49,8 @@ if __name__ == '__main__':
 
     cfg = parse_args()
 
-    client_old = hvac.Client(url=cfg.source_vault_url, token=cfg.source_vault_token)
-    client_new = hvac.Client(url=cfg.target_vault_url, token=cfg.target_vault_token)
+    client_old = hvac.Client(url=cfg.source_vault_url, token=cfg.source_vault_token, verify=False)
+    client_new = hvac.Client(url=cfg.target_vault_url, token=cfg.target_vault_token, verify=False)
 
     bar=ShadyBar("Copying secrets ", max=1)
     copy_secrets(client_old=client_old, client_new=client_new, source_mount=cfg.source_vault_mount, target_mount=cfg.target_vault_mount, bar=bar)

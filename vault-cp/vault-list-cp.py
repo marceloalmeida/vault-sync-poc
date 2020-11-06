@@ -48,8 +48,8 @@ if __name__ == '__main__':
 
     cfg = parse_args()
 
-    client_old = hvac.Client(url=cfg.source_vault_url, token=cfg.source_vault_token)
-    client_new = hvac.Client(url=cfg.target_vault_url, token=cfg.target_vault_token)
+    client_old = hvac.Client(url=cfg.source_vault_url, token=cfg.source_vault_token, verify=False)
+    client_new = hvac.Client(url=cfg.target_vault_url, token=cfg.target_vault_token, verify=False)
 
     old_kv_secrets = list_secrets(client_old, cfg.source_vault_mount)
 
