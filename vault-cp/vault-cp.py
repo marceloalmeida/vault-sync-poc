@@ -37,7 +37,7 @@ def copy_secrets(client_old, client_new, source_mount, target_mount, result_list
     list_secrets_result = client_old.list(path=source_mount)
     for secret in list_secrets_result["data"]["keys"]:
         if secret.endswith("/"):
-            copy_secrets(client_old=client_old, client_new=client_new, path=source_mount+secret, result_list=result_list, bar=bar)
+            copy_secrets(client_old=client_old, client_new=client_new, source_mount=source_mount+secret, target_mount=target_mount, result_list=result_list, bar=bar)
         else:
             data = client_old.read(source_mount+secret)["data"]
             client_new.write(lreplace(source_mount, target_mount, source_mount+secret), **data)

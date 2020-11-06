@@ -48,7 +48,7 @@ spec:
               - name: TARGET_VAULT_MOUNT
                 value: "secret/"
             image: marceloalmeida/vault-sync-poc:latest
-            imagePullPolicy: IfNotPresent
+            imagePullPolicy: Always
             name: vault2vault-sync
             resources:
               limits:
