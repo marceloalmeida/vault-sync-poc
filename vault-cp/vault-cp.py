@@ -5,8 +5,9 @@ import hvac
 from progress.bar import ShadyBar, Bar
 from progress.spinner import PixelSpinner, Spinner
 import re
+from urllib3 import disable_warnings
 
-global_suffix='%(index)d - %(avg).4f - %(elapsed)ds'
+global_suffix='%(index)d/%(max)d - %(percent).1f%% - %(avg).4f - %(elapsed)ds - %(eta)ds'
 
 def parse_args():
     '''Initialization of global variables'''
@@ -46,6 +47,7 @@ def copy_secrets(client_old, client_new, source_mount, target_mount, path, resul
     return None
 
 if __name__ == '__main__':
+    disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     cfg = parse_args()
 

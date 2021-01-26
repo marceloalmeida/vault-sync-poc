@@ -5,9 +5,14 @@ import hvac
 from progress.bar import ShadyBar
 from progress.spinner import PixelSpinner, Spinner
 import re
+from urllib3 import disable_warnings
+
+global_suffix='%(index)d/%(max)d - %(percent).1f%% - %(avg).4f - %(elapsed)ds - %(eta)ds'
 
 def parse_args():
-    '''Initialization of global variables'''
+    """
+    Initialization of global variables
+    """
     parser = ArgumentParser(description="Vault to Vault Sync")
     parser.add_argument('--source-vault-url', metavar='URL', type=str, required=True,
                         help='Vault URL to copy secrets from')
@@ -24,8 +29,6 @@ def parse_args():
     args = parser.parse_args()
 
     return args
-
-global_suffix='%(index)d/%(max)d - %(percent).1f%% - %(avg).4f - %(elapsed)ds - %(eta)ds'
 
 def lreplace(pattern, sub, string):
     """
@@ -45,6 +48,7 @@ def list_secrets(client, path, result_list=[], spinner=Spinner("Loading secrets 
     return result_list
 
 if __name__ == '__main__':
+    disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     cfg = parse_args()
 
